@@ -1,5 +1,7 @@
 import { Table, Column, Model, HasOne, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
+import Profile from "./Profile";
+
 
 @Table({
   modelName: 'User',
@@ -32,6 +34,12 @@ class User extends Model {
     comment: 'login count of user'
   })
   status: number;
+
+  @HasOne(() => Profile, 'user_id')
+  profile?: Profile;
+
 }
+
+
 
 export default User;

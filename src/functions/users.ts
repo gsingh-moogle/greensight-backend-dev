@@ -1,15 +1,24 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import sequelize from "../db_connection/db_connect";
 import User from "../models/User";
+import Profile from "../models/Profile";
 //import auth from "../middleware/auth";
 
 export async function users(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
 
   try {
-    const sequelizeConnection = sequelize(User);
+    const sequelizeConnection = sequelize();
     await sequelizeConnection.authenticate();
     
-    const users = await User.findAll();
+    let users = await User.findOne({
+      attributes: ['email'],
+      where:{id:1},
+      include:[{
+          model: Profile,
+          attributes: ['first_name','last_name','country_code','image','phone_number']
+      }]
+    });
+    
     return {
       status: 200,
       body: JSON.stringify(users)
