@@ -9,14 +9,11 @@ const sequelize = (dbName: string | null): Sequelize => {
     const options = {
         ...dbConfig,
         database: dbName || dbConfig.database,
-        pool: {
-            max: 10, // Maximum number of connections in the pool
-            min: 0,  // Minimum number of connections in the pool
-            idle: 10000, // Maximum time, in milliseconds, that a connection can be idle before being released
-            acquire: 30000 // Maximum time, in milliseconds, to acquire a connection from the pool
-        }
+        "logging": console.log
     };
     const db = new Sequelize(options);
+
+    console.log('await db.authenticate();',db.authenticate());
 
     fs.readdirSync(modelDir)
     .filter((file) => {

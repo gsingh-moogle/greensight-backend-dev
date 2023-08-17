@@ -3,7 +3,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 import sequelize from "../db_connection/db_connect";
 import User from "../models/User";
 import Profile from "../models/Profile";
-const sequelizeConnection = sequelize(null);
+//const sequelizeConnection = sequelize(null);
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
@@ -20,12 +20,6 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
     let otpMatch: string = '903412'
 
     let result; // Initialize a variable to hold the response data
-    
-    // Sample user data for authentication (can be replaced with a database query)
-    let data = [
-        { email: "manmeet.narula@greensight.ai", password: "ndDKycNN3U1ezUB" },
-        { email: "vermaganesh@greensight.ai", password: "K_dpgCrAmvYtJ1c", phone: "9034129736" }
-    ];
 
     try {
         // Parse the request body as JSON

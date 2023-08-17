@@ -11,7 +11,7 @@ import sequelize from "../db_connection/db_connect";
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
 import User from "../models/User";
 import Profile from "../models/Profile";
-const sequelizeConnection = sequelize(null);
+//const sequelizeConnection = sequelize(null);
 import bcrypt = require("bcrypt");
 
 // Main function to handle login requests
