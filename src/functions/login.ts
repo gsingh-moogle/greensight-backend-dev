@@ -5,13 +5,11 @@ import {
     HttpResponseInit,
     InvocationContext,
 } from "@azure/functions";
-import sequelize from "../db_connection/db_connect";
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
 import User from "../models/User";
 import Profile from "../models/Profile";
-const sequelizeConnection = sequelize(null);
 //const bcrypt = require("bcrypt");
 
 // Main function to handle login requests

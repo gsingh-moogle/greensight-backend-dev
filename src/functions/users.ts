@@ -1,9 +1,9 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import sequelize from "../db_connection/db_connect";
+
 import User from "../models/User";
 import Profile from "../models/Profile";
 import jwtMiddleware from '../middleware/auth'
-const sequelizeConnection = sequelize(null);
+
 
 export async function users(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
 
