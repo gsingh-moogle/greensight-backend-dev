@@ -80,7 +80,11 @@ export async function login(
     let user: User | undefined = await User.findOne({
       where: {
         email: email,
-      }
+      },
+      include:[{
+        model: Profile,
+        attributes: ['first_name','last_name','country_code','image','phone_number']
+    }]
     });
 
     // if (user) {
@@ -121,12 +125,12 @@ export async function login(
 
     if (user) {
       context.log("level 22222222222222222222222", user)
-      // let userProfile : UserData | undefined = await Profile.findOne({
-      //   where: {
-      //     id: user?.id,
-      //   },
-      // });
-      context.log("level 3333333333 userProfile", user)
+      let userProfile : UserData | undefined = await Profile.findOne({
+        where: {
+          id: user?.id,
+        },
+      });
+      context.log("level 3333333333 userProfile", userProfile)
       // if (user && user?.phone_number) {
       //   bcrypt.compare(password, user.password, (err, passwordMatch) => {
       //     if (err) {
