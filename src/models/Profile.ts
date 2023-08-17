@@ -24,7 +24,7 @@ class Profile extends Model {
   @Column({
     type: DataTypes.STRING
   })
-  county_code: string;
+  country_code: string;
 
   @Column({
     type: DataTypes.STRING
