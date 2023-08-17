@@ -1,6 +1,9 @@
 // Import necessary modules and libraries
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import * as crypto from "crypto-js";
+import sequelize from "../db_connection/db_connect";
+import User from "../models/User";
+import Profile from "../models/Profile";
+const sequelizeConnection = sequelize(null);
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
@@ -55,13 +58,32 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
         }
 
         // Find the user based on the provided email
-        let user: UserData | undefined = data.find((item) => item.email === email);
+        //let user: UserData | undefined = data.find((item) => item.email === email);
 
-        if (user && user?.phone) {
+         // Find the user based on the provided email
+            let user: User | undefined = await User.findOne({
+                where: {
+                email: email,
+                role:1
+                },
+                include: [
+                {
+                    model: Profile,
+                    attributes: [
+                    "first_name",
+                    "last_name",
+                    "country_code",
+                    "image",
+                    "phone_number",
+                    ],
+                },
+                ],
+            });
+
+        if (user && user?.profile?.phone_number) {
             if (otpMatch === otp) {
                 // OTP matches, generate and assign a token for authorization
-                user.token = token;
-                result = { status: true, message: "User Logged In Successfully.", data: { email: user.email, token: user.token } };
+                result = { status: true, message: "User Logged In Successfully.", data: { email: user.email, token: token,user:user } };
                 return {
                     status: 200, // OK
                     body: encryptDataFunction(result),
