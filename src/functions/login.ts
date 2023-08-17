@@ -5,7 +5,9 @@ import * as crypto from "crypto-js";
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
-
+import User from "../models/User";
+import Profile from "../models/Profile";
+const sequelizeConnection = sequelize(null);
 
 // Main function to handle login requests
 export async function login(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
@@ -21,7 +23,6 @@ export async function login(request: HttpRequest, context: InvocationContext): P
     ];
 
     try {
-        const sequelizeConnection = sequelize('green_sight');
         // Read the request body
         const requestBody = await request.text();
 

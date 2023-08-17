@@ -5,7 +5,7 @@ import { DataTypes } from 'sequelize';
   modelName: 'Profile',
   tableName: 'profile'
 })
-class User extends Model {
+class Profile extends Model {
   @Column({
     type: DataTypes.STRING
   })
@@ -37,4 +37,4 @@ class User extends Model {
   image: string;
 }
 
-export default User;
+export default Profile;
