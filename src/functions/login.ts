@@ -1,5 +1,6 @@
 // Import necessary modules and libraries
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import sequelize from "../db_connection/db_connect";
 import * as crypto from "crypto-js";
 
 // Import the function that encrypts the response.
@@ -20,6 +21,7 @@ export async function login(request: HttpRequest, context: InvocationContext): P
     ];
 
     try {
+        const sequelizeConnection = sequelize('green_sight');
         // Read the request body
         const requestBody = await request.text();
 

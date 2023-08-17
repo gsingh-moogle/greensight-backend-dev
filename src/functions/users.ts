@@ -3,13 +3,10 @@ import sequelize from "../db_connection/db_connect";
 import User from "../models/User";
 import Profile from "../models/Profile";
 //import auth from "../middleware/auth";
-
+const sequelizeConnection = sequelize(null);
 export async function users(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
 
   try {
-    const sequelizeConnection = sequelize();
-    await sequelizeConnection.authenticate();
-    
     let users = await User.findOne({
       attributes: ['email'],
       where:{id:1},
