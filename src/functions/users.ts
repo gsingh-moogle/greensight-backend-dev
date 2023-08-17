@@ -1,10 +1,12 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import sequelize from "../db_connection/db_connect";
 import User from "../models/User";
+//import auth from "../middleware/auth";
 
 export async function users(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-  const sequelizeConnection = sequelize(User);
+
   try {
+    const sequelizeConnection = sequelize(User);
     await sequelizeConnection.authenticate();
     
     const users = await User.findAll();

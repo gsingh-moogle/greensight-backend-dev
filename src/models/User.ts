@@ -31,12 +31,7 @@ class User extends Model {
     type: DataTypes.INTEGER,
     comment: 'login count of user'
   })
-  login_count: number;
-
-  @Column({
-    type: DataTypes.INTEGER
-  })
-  company_id: number;
+  status: number;
 }
 
 export default User;

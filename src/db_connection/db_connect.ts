@@ -3,6 +3,7 @@ import { Sequelize, ModelCtor} from "sequelize-typescript";
 import { dbConfig } from "./config";
 
 const sequelize = (models: ModelCtor<any>): Sequelize => {
+    try {
     const options = {
         ...dbConfig,
         pool: {
@@ -18,6 +19,9 @@ const sequelize = (models: ModelCtor<any>): Sequelize => {
     db.addModels([models]); // Add your models here
 
     return db;
+    } catch (err) {
+        console.log('err',err);
+    }
 };
 
 export default sequelize;
