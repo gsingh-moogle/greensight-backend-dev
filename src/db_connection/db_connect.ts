@@ -13,6 +13,8 @@ const sequelize = (dbName: string | null): Sequelize => {
     };
     const db = new Sequelize(options);
 
+    console.log('await db.authenticate();',db.authenticate());
+
     fs.readdirSync(modelDir)
     .filter((file) => {
         return (

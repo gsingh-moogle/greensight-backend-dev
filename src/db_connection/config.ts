@@ -8,4 +8,7 @@ export const dbConfig: Options = {
     database: process.env.DB_NAME,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
+    dialectOptions: {
+        encrypt: true,
+    }
 };
