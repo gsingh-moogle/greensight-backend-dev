@@ -1,3 +1,2 @@
-import sequelize from "../db_connection/db_connect";
-const sequelizeConnection = sequelize(null);
+import sequelizeInstances from "../db_connection/sequelize";
 

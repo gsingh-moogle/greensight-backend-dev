@@ -3,11 +3,10 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 
 // Import the JSON file containing the database list helper function.
 const dbList = require("../helper/db");
-import Company from "../models/Company";
+import Company from "../models/main_model/Company";
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
-import sequelize from "../db_connection/db_connect";
 
 // Define the userDatabaseList function that handles the HTTP request.
 export async function userDatabaseList(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
@@ -17,14 +16,6 @@ export async function userDatabaseList(request: HttpRequest, context: Invocation
         const database = await Company.findAll();
         let data = Company.getTableName()
         context.log(data, "table name")
-        const test = sequelize("green_sight")
-        // test.query('show tables').then(function (rows) {
-        //     context.log(JSON.stringify(rows), "check row ");
-        // });
-        // const sequelized = await sequelize("Lowes")
-        // sequelized.query('show tables').then(function (rows) {
-        //     console.log(JSON.stringify(rows), "check row");
-        // });
         result = { status: true, message: "Database  fetched successfully.", data: database };
         return {
             status: 200, // OK

@@ -1,19 +1,20 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-
-import User from "../models/User";
-import Profile from "../models/Profile";
+import sequelizeInstances from "../db_connection/sequelize";
+import User from "../models/main_model/User";
+import Profile from "../models/main_model/Profile";
 import jwtMiddleware from '../middleware/auth'
 
 
 export async function users(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
 
   try {
-    let authenticate = await jwtMiddleware(request, context);
-    if (authenticate.status == 401) {
-      return authenticate;
-    }
+    //let authenticate = await jwtMiddleware(request, context);
+    // if (authenticate.status == 401) {
+    //   return authenticate;
+    // }
+    console.log('sequelizeInstances',sequelizeInstances);
 
-    let users = await User.findOne({
+    let users = await sequelizeInstances.main.models.User.findOne({
       attributes: ['email'],
       where: { id: 1 },
       include: [{
