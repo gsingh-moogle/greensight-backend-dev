@@ -4,10 +4,7 @@ const secretKey = process.env.JWT_TOKEN;
 // Middleware function to validate JWT token
 export async function jwtMiddleware(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     // Get the request body and parse it as JSON.
-    console.log('request.headers',request.headers, "0 request",  request.headers.get("authorization"));
-    // const authorizationHeader = request.headers["authorization"].split(" ")[0];
-    // console.log('authorizationHeader=================>',authorizationHeader);
-    const token = request.headers.get("authorization")?request.headers.get("authorization"):'';//authorizationHeader?.split(' ')[1];
+    const token = request.headers.get("authorization")?request.headers.get("authorization"):'';
     if (!token) {
         return {
             status: 401,
