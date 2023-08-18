@@ -14,13 +14,7 @@ const sequelize = async (dbName: string | null): Promise<Sequelize> => {
         console.log(options, "check option")
 
         const db = new Sequelize(options);
-
-
-        const queryInterface = db.getQueryInterface();
-        const schemas = await queryInterface.showAllSchemas();
-        // const tableNames = schemas?.map(schema => schema.name);
-        // console.log('Table names:', tableNames);
-        console.log(schemas, "schema")
+        let arr = []
         fs.readdirSync(modelDir)
             .filter((file) => {
                 return (
@@ -30,8 +24,12 @@ const sequelize = async (dbName: string | null): Promise<Sequelize> => {
             })
             .forEach((file) => {
                 const model = require(path.join(modelDir, file)).default;
-                db.addModels([model]);
+                arr.push(model)
             });
+        db.addModels(arr);
+        const queryInterface = db.getQueryInterface();
+        const schemas = await queryInterface.showAllSchemas();
+        console.log(schemas, "schema")
         return db;
     } catch (err) {
         console.log('err', err);

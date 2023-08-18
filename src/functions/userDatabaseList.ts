@@ -14,62 +14,27 @@ export async function userDatabaseList(request: HttpRequest, context: Invocation
     let result;
 
     try {
+
+        // Get the request body and parse it as JSON.
+        // const requestBody = await request.text();
+        // const bodyData = JSON.parse(requestBody);
+
         const database = await Company.findAll();
-        let data = Company.getTableName()
-        context.log(data, "table name")
-        const test = sequelize("green_sight")
-        // test.query('show tables').then(function (rows) {
-        //     context.log(JSON.stringify(rows), "check row ");
-        // });
-        // const sequelized = await sequelize("Lowes")
-        // sequelized.query('show tables').then(function (rows) {
-        //     console.log(JSON.stringify(rows), "check row");
-        // });
-        result = { status: true, message: "Database  fetched successfully.", data: database };
+        const databaseTable = database?.map((i) => ({
+            name: i?.name,
+            id: i?.id
+        }));
+        console.log(databaseTable, "databaseTable")
+        // Prepare the successful response.
+        result = { status: true, message: "Database  fetched successfully.", data: databaseTable };
         return {
             status: 200, // OK
-            body:JSON.stringify(result), // encrypt the response 
+            body: JSON.stringify(result), // encrypt the response 
             headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*" // Allow cross-origin requests
             }
         };
-        // Get the request body and parse it as JSON.
-        // const requestBody = await request.text();
-        // const bodyData = JSON.parse(requestBody);
-
-        // if (bodyData.user_id) {
-
-        //     const database = Company.findAll();
-        //     // Filter the database list based on the provided user_id and map it to a new format.
-        //     const databaseTable = dbList?.filter((db: any) => db.user_id == bodyData.user_id).map((i) => ({
-        //         name: i?.db_name,
-        //         id: i?.db_id
-        //     }));
-
-        //     // Prepare the successful response.
-        //     result = { status: true, message: "Database  fetched successfully.", data: database };
-        //     return {
-        //         status: 200, // OK
-        //         body: JSON.stringify(result), // encrypt the response 
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //             "Access-Control-Allow-Origin": "*" // Allow cross-origin requests
-        //         }
-        //     };
-
-        // } else {
-        //     // Prepare the response for unauthorized access.
-        //     result = { status: false, message: "You are not authorized" };
-        //     return {
-        //         status: 400, // Bad Request
-        //         body: encryptDataFunction(result), // encrypt the response 
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //             "Access-Control-Allow-Origin": "*" // Allow cross-origin requests
-        //         }
-        //     };
-        // }
     } catch (err) {
         // Prepare the response for error cases.
         result = { status: false, message: err.message };
