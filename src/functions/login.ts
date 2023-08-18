@@ -35,7 +35,7 @@ export async function login(
 
     try {
         
-
+console.log("Login Call ")
         // Read the request body
         const requestBody = await request.text();
 
