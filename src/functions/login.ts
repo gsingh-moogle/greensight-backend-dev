@@ -1,16 +1,31 @@
 // Import necessary modules and libraries
+import * as dotenv from 'dotenv';
+dotenv.config(); // Load environment variables from .env file
 import {
   app,
   HttpRequest,
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
+import * as jwt from "jsonwebtoken";
+const secretKey = process.env.JWT_TOKEN;
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
 import User from "../models/main_model/User";
 import Profile from "../models/main_model/Profile";
+import UserOtp from "../models/otp";
 import bcrypt = require("bcrypt");
+import { sendVerificationCode } from '../helper/twilio';
+
+const createOrUpdateUser = (values: { [x: string]: any; }, condition: { user_id: any; }) => {
+  UserOtp.findOne({ where: condition }).then(function (obj) {
+    // update
+    if (obj) return obj.update(values);
+    // insert
+    return UserOtp.create(values);
+  });
+};
 
 // Main function to handle login requests
 export async function login(
@@ -28,7 +43,6 @@ export async function login(
     // Extract email and password from the parsed bodyData
     const email: string = bodyData.email || "";
     const password: string = bodyData.password || "";
-    let token: string = "fabcdefghijkl123mnop"; // Sample token for authorization
 
     // Check if email and password are provided
     if (!email || !password) {
@@ -58,7 +72,7 @@ export async function login(
     let user: User | undefined = await User.findOne({
       where: {
         email: email,
-        role:1
+        role: 1,
       },
       include: [
         {
@@ -74,35 +88,61 @@ export async function login(
       ],
     });
 
-
     if (user) {
       if (user && user?.profile?.phone_number) {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
-          // Password matches
-          context.log("/Password matches..");
           // Password matches and user has a phone number
-          const result = {
-            status: true,
-            message: "Verification code sent to registered phone number.",
-            otp: true,
-            data: {
-              email: user.email,
-              phone_number: user?.profile?.phone_number,
-            },
+          let code = Math.floor(100000 + Math.random() * 900000);
+          code = 903412;
+          let whereCondition = {
+            user_id: user.id,
           };
+          let updateValues = {
+            user_id: user?.id,
+            otp: code,
+            status: 0,
+          };
+          createOrUpdateUser(updateValues, whereCondition);
+          let messageData = {
+            message: 'Your verification code is :' + code,
+            phone_number: `${user.profile.country_code}${user.profile.phone_number}`
+          }
+          console.log('messageData', messageData);
+          let sendMessage = await sendVerificationCode(messageData);
+          if (sendMessage) {
+            const result = {
+              status: true,
+              message: "Verification code send to registered phone number.",
+              otp: true,
+              code: code,
+              data: {
+                email: user.email,
+                phone_number: user?.profile?.phone_number,
+              },
+            };
 
-          return {
-            status: 200, // OK
-            body: encryptDataFunction(result),
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-          };
+            return {
+              status: 200, // OK
+              body: encryptDataFunction(result),
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+              },
+            };
+          } else {
+            return {
+              status: 401, // Unauthorized
+              body: encryptDataFunction({ error: "Error while sending verification code to registered phone number." }),
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+              },
+            };
+          }
+
         } else {
           // Password doesn't match
-          context.log("//Password doesn't match");
           return {
             status: 401, // Unauthorized
             body: encryptDataFunction({ error: "Invalid credentials." }),
@@ -115,9 +155,14 @@ export async function login(
       } else {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch) {
-          context.log("/Password matches..else");
           //Password matches, generate and assign a token for authorization
-
+          let token = jwt.sign(
+            {
+              data: user,
+            },
+            secretKey,
+            { expiresIn: "1h" }
+          );
           const result = {
             status: true,
             message: "User Logged In Successfully.",
@@ -134,8 +179,6 @@ export async function login(
           };
         } else {
           // Password doesn't match
-          // ...rest of your code...
-          context.log("//Password doesn't match..else");
           return {
             status: 401, // Unauthorized
             body: encryptDataFunction({ error: "Invalid credentials." }),

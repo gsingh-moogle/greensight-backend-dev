@@ -1,8 +1,10 @@
-// Import necessary modules and libraries
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import sequelize from "../db_connection/sequelize";
+import sequelize from "../db_connection/db_connect";
 import User from "../models/main_model/User";
 import Profile from "../models/main_model/Profile";
+import UserOtp from "../models/otp";
+import * as jwt from "jsonwebtoken";
+const secretKey = process.env.JWT_TOKEN;
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
@@ -19,12 +21,6 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
     let otpMatch: string = '903412'
 
     let result; // Initialize a variable to hold the response data
-    
-    // Sample user data for authentication (can be replaced with a database query)
-    let data = [
-        { email: "manmeet.narula@greensight.ai", password: "ndDKycNN3U1ezUB" },
-        { email: "vermaganesh@greensight.ai", password: "K_dpgCrAmvYtJ1c", phone: "9034129736" }
-    ];
 
     try {
         // Parse the request body as JSON
@@ -33,7 +29,6 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
         // Extract email and OTP from the parsed user request
         const email: string = userReq.email || '';
         const otp: string = userReq.otp || '';
-        let token: string = "fabcdefghijkl123mnop"; // Sample token for authorization
 
         // Check if email and OTP are provided
         if (!email || !otp) {
@@ -56,9 +51,6 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
             token?: any;
         }
 
-        // Find the user based on the provided email
-        //let user: UserData | undefined = data.find((item) => item.email === email);
-
          // Find the user based on the provided email
             let user: User | undefined = await User.findOne({
                 where: {
@@ -80,20 +72,59 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
             });
 
         if (user && user?.profile?.phone_number) {
-            if (otpMatch === otp) {
-                // OTP matches, generate and assign a token for authorization
-                result = { status: true, message: "User Logged In Successfully.", data: { email: user.email, token: token,user:user } };
-                return {
-                    status: 200, // OK
-                    body: encryptDataFunction(result),
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    }
-                };
-            } else {
+            let condition = {
+                user_id:user.id
+            }
+            let otpData = await UserOtp.findOne({ 
+                attributes: ['otp', 'updatedAt'],
+                where: condition }); 
+            if(otpData){
+                const currentTime = new Date();
+                const otpExpirationTime = new Date(otpData.updatedAt);
+                otpExpirationTime.setMinutes(otpExpirationTime.getMinutes() + 1); // OTP expires after 1 minute
+
+                if (currentTime > otpExpirationTime) {
+                    result = { status: false, message: "OTP has expired. Please request a new OTP." };
+                    return {
+                        status: 401, // Unauthorized
+                        body: encryptDataFunction(result),
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        }
+                    };
+                }
+
+                // Check if OTP matches
+                if (otpData?.otp === otp) {
+                    // OTP matches, generate and assign a token for authorization
+                    let token = jwt.sign({
+                        data: user
+                      }, secretKey, { expiresIn: '1h' });
+                    result = { status: true, message: "User Logged In Successfully.", data: { email: user.email, token: token,user:user } };
+                    return {
+                        status: 200, // OK
+                        body: encryptDataFunction(result),
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        }
+                    };
+                } else {
+                    // Invalid OTP
+                    result = { status: false, message: "Verification code is not valid!" };
+                    return {
+                        status: 401, // Unauthorized
+                        body: encryptDataFunction(result),
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        }
+                    };
+                }
+            } else { 
                 // Invalid OTP
-                result = { status: false, message: "Invalid OTP." };
+                result = { status: false, message: "Verification code is not found!" };
                 return {
                     status: 401, // Unauthorized
                     body: encryptDataFunction(result),
@@ -103,6 +134,8 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
                     }
                 };
             }
+        
+            
         }
 
         // User not found or phone not provided
@@ -132,7 +165,7 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
 
 // Define an HTTP endpoint named 'verifyOTP'
 app.http('verifyOTP', {
-    methods: ['GET', 'POST'], // Allow both GET and POST requests
+    methods: ['POST'], // Allow only POST requests
     authLevel: 'anonymous', // No authentication required
     handler: verifyOTP // Use the 'verifyOTP' function to handle requests
 });
