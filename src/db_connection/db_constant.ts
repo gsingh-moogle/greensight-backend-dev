@@ -6,9 +6,5 @@ export const dbConst = {
     'lowes' : {
         name : 'lowes',
         modelDir : 'common_model'
-    },
-    'schnieder': {
-        name : 'GreensightSQL',
-        modelDir : 'common_model'
-    },
+    }
 };

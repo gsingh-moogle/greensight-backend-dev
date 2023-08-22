@@ -1,12 +1,11 @@
 import { Table, Column, Model, HasOne, BelongsTo, ForeignKey, BelongsToMany } from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
-import UserCompany from "./UserCompany";
-import User from "./User";
 
 @Table({
   modelName: 'Company',
   tableName: 'company'
 })
+
 class Company extends Model {
   @Column({
     type: DataTypes.STRING
@@ -16,7 +15,7 @@ class Company extends Model {
   @Column({
     type: DataTypes.STRING
   })
-  db_alias: string;
+  db_name: string;
 
   @Column({
     type: DataTypes.STRING
@@ -27,9 +26,6 @@ class Company extends Model {
     type: DataTypes.INTEGER
   })
   status: number;
-
-  @BelongsToMany(() => User, () => UserCompany)
-  users?: User[];
 
 }
 

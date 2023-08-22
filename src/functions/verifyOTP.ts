@@ -1,8 +1,7 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import sequelize from "../db_connection/db_connect";
 import User from "../models/main_model/User";
 import Profile from "../models/main_model/Profile";
-import UserOtp from "../models/otp";
+import UserOtp from "../models/main_model/UserOtp";
 import * as jwt from "jsonwebtoken";
 const secretKey = process.env.JWT_TOKEN;
 

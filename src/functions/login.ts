@@ -9,21 +9,21 @@ import {
 } from "@azure/functions";
 import * as jwt from "jsonwebtoken";
 const secretKey = process.env.JWT_TOKEN;
-
+import { sequelizeInstances, masterDbConnection } from "../db_connection/sequelize";
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
-import User from "../models/main_model/User";
 import Profile from "../models/main_model/Profile";
-import UserOtp from "../models/otp";
+import UserOtp from "../models/main_model/UserOtp";
 import bcrypt = require("bcrypt");
 import { sendVerificationCode } from '../helper/twilio';
 
 const createOrUpdateUser = (values: { [x: string]: any; }, condition: { user_id: any; }) => {
-  UserOtp.findOne({ where: condition }).then(function (obj) {
+  
+  sequelizeInstances.main.models.UserOtp.findOne({ where: condition }).then(function (obj) {
     // update
     if (obj) return obj.update(values);
     // insert
-    return UserOtp.create(values);
+    return sequelizeInstances.main.models.UserOtp.create(values);
   });
 };
 
@@ -36,7 +36,6 @@ export async function login(
   try {
     // Read the request body
     const requestBody = await request.text();
-
     // Parse the request body as JSON
     const bodyData = JSON.parse(requestBody);
 
@@ -69,14 +68,14 @@ export async function login(
     }
 
     // Find the user based on the provided email
-    let user: User | undefined = await User.findOne({
+    let user: any = await masterDbConnection.models.User.findOne({
       where: {
         email: email,
         role: 1,
       },
       include: [
         {
-          model: Profile,
+          model: masterDbConnection.models.Profile,
           attributes: [
             "first_name",
             "last_name",
@@ -85,9 +84,16 @@ export async function login(
             "phone_number",
           ],
         },
+        {
+          model: masterDbConnection.models.Company,
+          attributes: [
+            "name",
+            "db_alias",
+            "logo"
+          ],
+        },
       ],
     });
-
     if (user) {
       if (user && user?.profile?.phone_number) {
         const passwordMatch = await bcrypt.compare(password, user.password);

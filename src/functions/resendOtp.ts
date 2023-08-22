@@ -2,7 +2,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
 import User from "../models/main_model/User";
 import Profile from "../models/main_model/Profile";
-import UserOtp from "../models/otp";
+import UserOtp from "../models/main_model/UserOtp";
 import { sendVerificationCode } from '../helper/twilio';
 
 const createOrUpdateUser = (values, condition) => {
