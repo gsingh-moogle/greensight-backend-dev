@@ -1,7 +1,4 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-
-import User from "../models/User";
-import Profile from "../models/Profile";
 import jwtMiddleware from '../middleware/auth'
 
 
@@ -12,16 +9,9 @@ export async function users(request: HttpRequest, context: InvocationContext): P
     if (authenticate.status == 401) {
       return authenticate;
     }
-
-    let users = await User.findOne({
-      attributes: ['email'],
-      where: { id: 1 },
-      include: [{
-        model: Profile,
-        attributes: ['first_name', 'last_name', 'country_code', 'image', 'phone_number']
-      }]
-    });
-
+    console.log("request['db']",request['db']);
+    let users = await request['db'].Company.findAll();
+    console.log('user', users);
     return {
       status: 200,
       body: JSON.stringify(users)

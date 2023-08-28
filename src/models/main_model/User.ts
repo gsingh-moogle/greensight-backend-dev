@@ -1,6 +1,8 @@
-import { Table, Column, Model, HasOne, BelongsTo, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, HasOne, BelongsToMany} from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
 import Profile from "./Profile";
+import Company from "./Company";
+import UserCompany from "./UserCompany";
 
 
 @Table({
@@ -38,8 +40,9 @@ class User extends Model {
   @HasOne(() => Profile, 'user_id')
   profile?: Profile;
 
+  @BelongsToMany(() => Company, () => UserCompany)
+  companies?: Company[];
+
 }
-
-
 
 export default User;

@@ -2,7 +2,8 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
-import Company from "../models/Company";
+import Company from "../models/main_model/Company";
+
 import sequelize from "../db_connection/db_connect";
 
 // Import the JSON file containing the database list and table from  helper .

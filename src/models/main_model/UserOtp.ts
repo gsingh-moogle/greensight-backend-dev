@@ -1,26 +1,23 @@
 import { Table, Column, Model, HasOne, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
-
 @Table({
-  modelName: 'Company',
-  tableName: 'company'
+  modelName: 'User_otps',
+  tableName: 'user_otps'
 })
-class Company extends Model {
+class UserOtp extends Model {
   @Column({
-    type: DataTypes.STRING
+    type: DataTypes.INTEGER
   })
-  name: string;
+  user_id: number;
 
   @Column({
     type: DataTypes.STRING
   })
-  logo: string;
+  otp: string;
 
   @Column({
     type: DataTypes.INTEGER
   })
   status: number;
-
 }
-
-export default Company;
+export default UserOtp;

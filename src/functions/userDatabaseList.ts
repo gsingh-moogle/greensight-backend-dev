@@ -1,13 +1,11 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 
-// Import the Company model to access database data.
-import Company from "../models/Company";
+// Import the JSON file containing the database list helper function.
+const dbList = require("../helper/db");
+import Company from "../models/main_model/Company";
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
-
-// Import the Sequelize database connection.
-import sequelize from "../db_connection/db_connect";
 
 // Import the  middleware for authentication.
 import jwtMiddleware from "../middleware/auth";
@@ -37,6 +35,9 @@ export async function userDatabaseList(request: HttpRequest, context: Invocation
 
         // Prepare the successful response.
         result = { status: true, message: "Database fetched successfully.", data: databaseTable };
+        let data = Company.getTableName()
+        context.log(data, "table name")
+        result = { status: true, message: "Database  fetched successfully.", data: database };
         return {
             status: 200, // OK
             body: encryptDataFunction(result), // Encrypt the response.
