@@ -4,6 +4,7 @@ import User from "../models/main_model/User";
 import Profile from "../models/main_model/Profile";
 import UserOtp from "../models/main_model/UserOtp";
 import { sendVerificationCode } from '../helper/twilio';
+import { generateResponse } from '../helper/response';
 
 const createOrUpdateUser = (values, condition) => {
   UserOtp.findOne({ where: condition }).then(function (obj) {
@@ -31,21 +32,13 @@ export async function resendOtp(request: HttpRequest, context: InvocationContext
         status: false,
         message: "Email is required",
       };
-      return {
-        status: 400, // Bad Request
-        body: encryptDataFunction(result),
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      };
+      return generateResponse(400,false,"Email is required.")
     }
 
     // Find the user based on the provided email
     let user: User | undefined = await User.findOne({
       where: {
         email: email,
-        role: 1,
       },
       include: [
         {
@@ -80,68 +73,27 @@ export async function resendOtp(request: HttpRequest, context: InvocationContext
           phone_number: `${user.profile.country_code}${user.profile.phone_number}`,
         };
 
-        let sendMessage = await sendVerificationCode(messageData);
+        let sendMessage = true;//await sendVerificationCode(messageData);
         if (sendMessage) {
           const result = {
-            status: true,
-            message: "Verification code sent to registered phone number.",
-            otp: true,
-            code: code,
-            data: {
+              otp: true,
               email: user.email,
-              phone_number: user?.profile?.phone_number,
-            },
+              code: code,
+              phone_number: user?.profile?.phone_number
           };
-
-          return {
-            status: 200, // OK
-            body: encryptDataFunction(result),
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-          };
-        } else {
-          return {
-            status: 401, // Unauthorized
-            body: encryptDataFunction({ error: "Error while sending verification code to registered phone number." }),
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-          };
-        }
+          return generateResponse(200,true,"Verification code send to registered phone number.",result);
       } else {
-        return {
-          status: 401, // Unauthorized
-          body: encryptDataFunction({ error: "User does not have a registered phone number." }),
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        };
+          return generateResponse(401,false,"Error while sending verification code to registered phone number.");
+      }
+      } else {
+        return generateResponse(401,false,"User does not have a registered phone number.");
       }
     } else {
-      return {
-        status: 404, // Not Found
-        body: encryptDataFunction({ error: "User not found." }),
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      };
+      return generateResponse(404,false,"User not found.");
     }
   } catch (err) {
     // Handle errors and return a response
-    const result = { status: false, message: err.message };
-    return {
-      status: 500, // Internal Server Error
-      body: encryptDataFunction(result),
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return generateResponse(500,false,"err.message.");
   }
 }
 

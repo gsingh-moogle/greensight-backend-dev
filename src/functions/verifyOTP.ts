@@ -7,21 +7,17 @@ const secretKey = process.env.JWT_TOKEN;
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
+import { generateResponse } from '../helper/response';
 
 // Main function to handle OTP verification requests
 export async function verifyOTP(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     // Log the processing of the HTTP request
     context.log(`Http function processed request for url "${request.url}"`);
-    
-    // Read the OTP details from the request body
-    const otpDetails = await request.text();
-
-    // Sample OTP for demonstration (replace with your actual OTP validation logic)
-    let otpMatch: string = '903412'
-
-    let result; // Initialize a variable to hold the response data
-
     try {
+        // Read the OTP details from the request body
+        const otpDetails = await request.text();
+        
+
         // Parse the request body as JSON
         const userReq = JSON.parse(otpDetails);
 
@@ -31,15 +27,7 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
 
         // Check if email and OTP are provided
         if (!email || !otp) {
-            result = { status: false, message: "Email and OTP both are required" };
-            return {
-                status: 401, // Unauthorized
-                body: encryptDataFunction(result),
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                }
-            };
+            return generateResponse(401,false,"Email and OTP both are required");
         }
 
         // Define a type for user data
@@ -54,7 +42,6 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
             let user: User | undefined = await User.findOne({
                 where: {
                 email: email,
-                role:1
                 },
                 include: [
                 {
@@ -83,82 +70,42 @@ export async function verifyOTP(request: HttpRequest, context: InvocationContext
                 otpExpirationTime.setMinutes(otpExpirationTime.getMinutes() + 1); // OTP expires after 1 minute
 
                 if (currentTime > otpExpirationTime) {
-                    result = { status: false, message: "OTP has expired. Please request a new OTP." };
-                    return {
-                        status: 401, // Unauthorized
-                        body: encryptDataFunction(result),
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*"
-                        }
-                    };
+                    return generateResponse(401,false,"OTP has expired. Please request a new OTP.");
                 }
 
                 // Check if OTP matches
-                if (otpData?.otp === otp) {
+                if (otpData?.otp == otp) {
                     // OTP matches, generate and assign a token for authorization
                     let token = jwt.sign({
                         data: user
                       }, secretKey, { expiresIn: '1h' });
-                    result = { status: true, message: "User Logged In Successfully.", data: { email: user.email, token: token,user:user } };
-                    return {
-                        status: 200, // OK
-                        body: encryptDataFunction(result),
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*"
-                        }
+                      const result = {
+                        id:user?.id,
+                        email: user.email, 
+                        token: token, 
+                        name:user?.name,
+                        role:user?.role,
+                        profile:user?.profile,
                     };
+                    return generateResponse(200,true,"User Logged In Successfully.",result);
                 } else {
                     // Invalid OTP
-                    result = { status: false, message: "Verification code is not valid!" };
-                    return {
-                        status: 401, // Unauthorized
-                        body: encryptDataFunction(result),
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*"
-                        }
-                    };
+                    return generateResponse(401,false,"Verification code is not valid!");
                 }
             } else { 
                 // Invalid OTP
-                result = { status: false, message: "Verification code is not found!" };
-                return {
-                    status: 401, // Unauthorized
-                    body: encryptDataFunction(result),
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    }
-                };
+                return generateResponse(401,false,"Verification code is not found");
             }
         
             
         }
 
         // User not found or phone not provided
-        result = { status: false, message: "Invalid email or phone." };
-        return {
-            status: 401, // Unauthorized
-            body: encryptDataFunction(result),
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            }
-        };
+        return generateResponse(401,false,"User not found or phone not provided");
 
     } catch (err) {
         // Handle errors and return a response
-        result = { status: false, message: err.message };
-        return {
-            status: 400, // Bad Request
-            body: encryptDataFunction(result),
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            }
-        };
+        return generateResponse(401,false,err.message);
     }
 };
 

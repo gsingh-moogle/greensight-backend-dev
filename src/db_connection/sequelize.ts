@@ -12,7 +12,13 @@ const setupSequelize = async (): Promise<void> => {
             const options = {
                 ...dbConfig,
                 database: dbConst[database]['name'],
-                logging: console.log
+                pool: {
+                    max: 10, // Maximum number of connections in the pool
+                    min: 0, // Minimum number of connections in the pool
+                    idle: 10000, // Maximum time, in milliseconds, that a connection can be idle before being released
+                    acquire: 30000, // Maximum time, in milliseconds, to acquire a connection from the pool
+                },
+                log: console.log
             };
             
             const sequelizeInstance = new Sequelize(options);

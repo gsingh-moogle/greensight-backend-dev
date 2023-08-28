@@ -1,7 +1,6 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import jwtMiddleware from '../middleware/auth'
 
-
 export async function users(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
 
   try {

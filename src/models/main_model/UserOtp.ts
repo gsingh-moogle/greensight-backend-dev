@@ -1,7 +1,7 @@
 import { Table, Column, Model, HasOne, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
 @Table({
-  modelName: 'User_otps',
+  modelName: 'UserOtp',
   tableName: 'user_otps'
 })
 class UserOtp extends Model {

@@ -11,15 +11,5 @@
   "extensionBundle": {
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
     "version": "[3.15.0, 4.0.0)"
-  },
-  "extensions": {
-    "durableTask": {
-      "storageProvider": {
-        "type": "mssql",
-        "connectionStringName": "SQLDB_Connection",
-        "taskEventLockTimeout": "00:02:00",
-        "createDatabaseIfNotExists": true
-      }
-    }
   }
 }

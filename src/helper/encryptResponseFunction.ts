@@ -2,7 +2,7 @@
 import * as crypto from "crypto-js";
 // Import the secret key from the constant module.
 const constant = require("../helper/constant");
-let isDev = true;
+let isDev = false;
 
 
 export const encryptDataFunction = (data) => {
@@ -13,8 +13,6 @@ export const encryptDataFunction = (data) => {
         // Return the encrypted data as a string.
         return encryptedData;
     } else {
-        const encryptedData = JSON.stringify(data).toString();
-
-        return encryptedData;
+        return data;
     }
 }
