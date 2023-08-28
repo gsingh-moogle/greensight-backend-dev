@@ -2,6 +2,8 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 
 // Import the function that encrypts the response.
 import { encryptDataFunction } from "../helper/encryptResponseFunction";
+import Company from "../models/Company";
+import sequelize from "../db_connection/db_connect";
 
 // Import the JSON file containing the database list and table from  helper .
 const dbList = require("../helper/db");
@@ -16,10 +18,39 @@ export async function databaseTableColumn(request: HttpRequest, context: Invocat
         // Get the request body and parse it as JSON.
         const requestBody = await request.text();
         const bodyData = JSON.parse(requestBody);
+        let databaseTableColumn = [];
+        console.log("Hello hnji")
+        const database = await Company.findOne({
+            where: { id: bodyData?.db_id }
+        });
+        console.log(database, "check database")
+        // console.log("test")
+        // const checkTableColumn = await Company.rawAttributes;
+        // console.log(checkTableColumn, "checkTableColumn")
 
+        // Get details of the specified database using the sequelize function.
+        const databaseDetail = await sequelize("Lowes")
+        console.log(databaseDetail, "databaseDetail")
+        async function getTableColumns(tableName: string) {
+            console.log(tableName,"tableName")
+            const queryInterface = databaseDetail.getQueryInterface();
+            const columns = await queryInterface.describeTable(tableName);
+            console.log(columns, "check column")
+            return columns;
+        }
+
+        const dynamicTableName = 'schneider_lowes';
+        getTableColumns(dynamicTableName)
+            .then(columns => {
+                console.log(`Columns for table ${dynamicTableName}:`, columns);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         if (bodyData.db_id && bodyData.user_id && bodyData.table_id) {
-            let databaseTableColumn = [];
 
+            // let check = databaseDetail.define
+            // console.log(check, "hnji")
             // Filter the dbList based on user_id and db_id, and map matching tables.
             dbList?.filter((db: any) => {
                 db?.tables?.map((table: any) => {
@@ -31,7 +62,6 @@ export async function databaseTableColumn(request: HttpRequest, context: Invocat
                     });
                 });
             });
-
             // Prepare the successful response.
             result = { status: true, message: "Database table column fetched successfully.", data: databaseTableColumn };
             return {

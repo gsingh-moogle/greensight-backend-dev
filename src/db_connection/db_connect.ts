@@ -10,7 +10,7 @@ const sequelize = async (dbName: string | null): Promise<Sequelize> => {
             ...dbConfig,
             database: dbName || dbConfig.database,
             "logging": console.log
-        };
+        }
         console.log(options, "check option")
 
         const db = new Sequelize(options);

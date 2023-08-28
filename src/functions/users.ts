@@ -9,10 +9,9 @@ export async function users(request: HttpRequest, context: InvocationContext): P
 
   try {
     let authenticate = await jwtMiddleware(request, context);
-    console.log('authenticate',authenticate.status)
-    // if (authenticate.status == 401) {
-    //   return authenticate;
-    // }
+    if (authenticate.status == 401) {
+      return authenticate;
+    }
 
     let users = await User.findOne({
       attributes: ['email'],
